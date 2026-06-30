@@ -1,0 +1,25 @@
+{
+  "name": "qa-guru",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "codegen": "npx playwright codegen",
+    "report": "npx playwright show-report",
+    "ui": "npx playwright test --ui",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@faker-js/faker": "^10.4.0",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.7.0",
+    "eslint": "^10.4.0",
+    "eslint-plugin-playwright": "^2.10.3"
+  }
+}
