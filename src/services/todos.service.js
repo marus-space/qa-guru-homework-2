@@ -7,21 +7,24 @@ export class TodosService {
     this.path = 'todos';
   }
 
-  async get({ token, params }) {
-    const urlParams = params
-      ? `?${Object.entries(params).map(([key, value]) => `${key}=${value}`)}`
+  async get({ token, urlParams, requestHeaders }) {
+    const params = urlParams
+      ? `?${Object.entries(urlParams).map(([key, value]) => `${key}=${value}`).join('&')}`
       : '';
     
-    return test.step(`GET /${this.path}/${urlParams}`, async () => {
-      const response = await this.request.get(`${apiUrl}/${this.path}${urlParams}`, {
+    return test.step(`GET /${this.path}${params}`, async () => {
+      const response = await this.request.get(`${apiUrl}/${this.path}${params}`, {
         headers: {
           'x-challenger': token,
+          ...requestHeaders,
         },
       });
 
       const status = await response.status();
       const headers = await response.headers();
-      const body = await response.json();
+      const body = headers['content-type']?.includes('application/json')
+        ? await response.json()
+        : await response.text();
       
       return { status, headers, body };
     });
@@ -44,18 +47,21 @@ export class TodosService {
     });
   }
 
-  async post({ token, data }) {
+  async post({ token, requestHeaders, data }) {
     return test.step(`POST /${this.path}`, async () => {
       const response = await this.request.post(`${apiUrl}/${this.path}`, {
         headers: {
           'x-challenger': token,
+          ...requestHeaders,
         },
         data,
       });
 
       const status = await response.status();
       const headers = await response.headers();
-      const body = await response.json();
+      const body = headers['content-type']?.includes('application/json')
+        ? await response.json()
+        : await response.text(); 
       
       return { status, headers, body };
     });
@@ -105,12 +111,9 @@ export class TodosService {
       const status = await response.status();
       const statusText = response.statusText();
       const headers = await response.headers();
-
-      let body;
-
-      if (status === 200) {
-        body = await response.json();
-      }      
+      const body = headers['content-type']?.includes('application/json')
+        ? await response.json()
+        : await response.text(); 
       
       return { status, statusText, headers, body };
     });

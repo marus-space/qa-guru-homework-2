@@ -1,16 +1,27 @@
 import { faker } from '@faker-js/faker';
 
 export class TodoBuilder {
-  withTitle() {
-    this.title = faker.lorem.sentence(5);
+  withTitle({ length } = {}) {
+    this.title = length !== undefined
+      ? faker.string.alpha(length)
+      : faker.lorem.sentence(5);
     return this;
   }
   withDoneStatus(doneStatus) {
     this.doneStatus = doneStatus ?? faker.datatype.boolean();
     return this;
   }
-  withDescription() {
-    this.description = faker.lorem.sentence(10);
+  withDescription({ length } = {}) {
+    this.description = length !== undefined
+      ? faker.string.alpha(length)
+      : faker.lorem.sentence(10);
+    return this;
+  }
+  /**
+   * Несуществующее поле.
+   */
+  withDeadline() {
+    this.deadline = faker.date.future();
     return this;
   }
   build() {
