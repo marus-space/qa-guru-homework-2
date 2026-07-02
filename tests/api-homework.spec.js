@@ -1,17 +1,24 @@
 import { expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
-import { test, TodoBuilder } from '../src/helpers';
+import open from 'open';
+import { test, apiUrl, TodoBuilder } from '../src/helpers';
 
 let token;
+let resultUrl;
+
+test.afterAll(async () => {
+  await open(resultUrl);
+});
 
 test('Получить токен', { tag: '@post' }, async ({ api }) => {
   const { status, headers } = await api.challenger.post();
 
-  token = headers['x-challenger'];
-
   expect(status).toBe(201);
   expect(headers).toHaveProperty('x-challenger');
   expect(headers).toHaveProperty('location');
+
+  token = headers['x-challenger'];
+  resultUrl = `${apiUrl}${headers.location}`;
 });
 
 test('Получить список челленджей', { tag: '@get' }, async ({ api }) => {

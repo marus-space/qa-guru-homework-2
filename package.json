@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
+    "test:all": "npm install && npm test && npm run report",
     "codegen": "npx playwright codegen",
     "report": "npx playwright show-report",
     "ui": "npx playwright test --ui",
@@ -20,6 +21,7 @@
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.7.0",
     "eslint": "^10.4.0",
-    "eslint-plugin-playwright": "^2.10.3"
+    "eslint-plugin-playwright": "^2.10.3",
+    "open": "^11.0.0"
   }
 }

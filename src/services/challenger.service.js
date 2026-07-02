@@ -13,8 +13,6 @@ export class ChallengerService {
       
       const status = await response.status();
       const headers = await response.headers();
-
-      console.log(`${apiUrl}${headers.location}`);
       
       return { status, headers };
     });
