@@ -1,6 +1,13 @@
 import { faker } from '@faker-js/faker';
 
 export class TodoBuilder {
+  /**
+   * Поле создается на сервере автоматически.
+   */
+  withId({ min, max }) {
+    this.id = faker.number.int({ min, max });
+    return this;
+  }
   withTitle({ length } = {}) {
     this.title = length !== undefined
       ? faker.string.alpha(length)

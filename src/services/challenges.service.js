@@ -1,7 +1,6 @@
 import { test } from '@playwright/test';
 import { apiUrl } from '../helpers';
 
-
 export class ChallengesService {
   constructor(request) {
     this.request = request;

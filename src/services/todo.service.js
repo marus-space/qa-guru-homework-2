@@ -1,6 +1,9 @@
 import { test } from '@playwright/test';
 import { apiUrl } from '../helpers';
 
+/**
+ *  Несуществующий эндпоинт.
+ */
 export class TodoService {
   constructor(request) {
     this.request = request;

@@ -1,5 +1,4 @@
 import { expect } from '@playwright/test';
-import { faker } from '@faker-js/faker';
 import open from 'open';
 import { test, apiUrl, TodoBuilder } from '../src/helpers';
 
@@ -279,8 +278,7 @@ test.describe('Создать задачу', () => {
 
 test.describe('Попытаться создать задачу', () => {
   test('вызывая неверный HTTP-метод', { tag: '@put' }, async ({ api }) => {
-    const id = faker.number.int({ min: 11, max: 100 });
-    const data = new TodoBuilder().withTitle().withDoneStatus().withDescription().build();
+    const { id, ...data } = new TodoBuilder().withId({ min: 20, max: 100 }).withTitle().withDoneStatus().withDescription().build();
 
     const { status, statusText } = await api.todos.putById({ token, id, data });
 
