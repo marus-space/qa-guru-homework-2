@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { apiUrl } from '../helpers';
+import { apiUrl, TOKEN_KEY } from '../helpers';
 
 export class ChallengesService {
   constructor(request) {
@@ -11,7 +11,7 @@ export class ChallengesService {
     return test.step(`GET /${this.path}`, async () => {
       const response = await this.request.get(`${apiUrl}/${this.path}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
         },
       });
 

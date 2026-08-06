@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { apiUrl } from '../helpers';
+import { apiUrl, TOKEN_KEY } from '../helpers';
 
 export class TodosService {
   constructor(request) {
@@ -15,7 +15,7 @@ export class TodosService {
     return test.step(`GET /${this.path}${params}`, async () => {
       const response = await this.request.get(`${apiUrl}/${this.path}${params}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
           ...requestHeaders,
         },
       });
@@ -34,7 +34,7 @@ export class TodosService {
     return test.step(`GET /${this.path}/${id}`, async () => {
       const response = await this.request.get(`${apiUrl}/${this.path}/${id}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
         },
       });
 
@@ -51,7 +51,7 @@ export class TodosService {
     return test.step(`POST /${this.path}`, async () => {
       const response = await this.request.post(`${apiUrl}/${this.path}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
           ...requestHeaders,
         },
         data,
@@ -71,7 +71,7 @@ export class TodosService {
     return test.step(`POST /${this.path}/${id}`, async () => {
       const response = await this.request.post(`${apiUrl}/${this.path}/${id}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
         },
         data,
       });
@@ -88,7 +88,7 @@ export class TodosService {
     return test.step(`DELETE /${this.path}/${id}`, async () => {
       const response = await this.request.delete(`${apiUrl}/${this.path}/${id}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
         },
       });
 
@@ -103,7 +103,7 @@ export class TodosService {
     return test.step(`PUT /${this.path}/${id}`, async () => {
       const response = await this.request.put(`${apiUrl}/${this.path}/${id}`, {
         headers: {
-          'x-challenger': token,
+          [TOKEN_KEY]: token,
         },
         data,
       });
