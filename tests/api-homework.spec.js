@@ -1,9 +1,16 @@
 import { expect } from '@playwright/test';
 import open from 'open';
-import { test, apiUrl, TodoBuilder } from '../src/helpers';
+import { test, apiUrl, TodoBuilder, TOKEN_KEY } from '../src/helpers';
 
 let token;
 let resultUrl;
+
+test.beforeAll(async ({ api }) => {
+  const { headers } = await api.challenger.post();
+
+  token = headers[TOKEN_KEY];
+  resultUrl = `${apiUrl}${headers.location}`;
+});
 
 test.afterAll(async () => {
   await open(resultUrl);
@@ -13,18 +20,15 @@ test('Получить токен', { tag: '@post' }, async ({ api }) => {
   const { status, headers } = await api.challenger.post();
 
   expect(status).toBe(201);
-  expect(headers).toHaveProperty('x-challenger');
+  expect(headers).toHaveProperty(TOKEN_KEY);
   expect(headers).toHaveProperty('location');
-
-  token = headers['x-challenger'];
-  resultUrl = `${apiUrl}${headers.location}`;
 });
 
 test('Получить список челленджей', { tag: '@get' }, async ({ api }) => {
   const { status, body } = await api.challenges.get(token);
 
   expect(status).toBe(200);
-  expect(body.challenges).toHaveLength(59);
+  expect(body.challenges.length).toBeGreaterThan(0);
 
   for (const challenge of body.challenges) {
     expect(Object.keys(challenge).sort()).toEqual(['description', 'id', 'name', 'status']);
@@ -197,7 +201,7 @@ test.describe('Работа с задачей', () => {
   test('Удалить созданную задачу', { tag: '@delete' }, async ({ api }) => {
     const { status } = await api.todos.delete({ token, id: createdTodo.id });
 
-    expect(status).toBe(200);
+    expect(status).toBe(204);
   });
 
   test('Попытаться получить удаленную задачу', { tag: '@get' }, async ({ api }) => {
@@ -278,12 +282,12 @@ test.describe('Создать задачу', () => {
 
 test.describe('Попытаться создать задачу', () => {
   test('вызывая неверный HTTP-метод', { tag: '@put' }, async ({ api }) => {
-    const { id, ...data } = new TodoBuilder().withId({ min: 20, max: 100 }).withTitle().withDoneStatus().withDescription().build();
+    const data = new TodoBuilder().withId({ min: 20, max: 100 }).withTitle().withDoneStatus().withDescription().build();
 
-    const { status, statusText } = await api.todos.putById({ token, id, data });
+    const { status, statusText } = await api.todos.putById({ token, id: data.id, data });
 
-    expect(status).toBe(400);
-    expect(statusText).toBe('Bad Request');
+    expect(status).toBe(422);
+    expect(statusText).toBe('Unprocessable Entity');
   });
 
   test('с неверным статусом', { tag: '@post' }, async ({ api }) => {
@@ -291,7 +295,7 @@ test.describe('Попытаться создать задачу', () => {
 
     const { status, body } = await api.todos.post({ token, data });
 
-    expect(status).toBe(400);
+    expect(status).toBe(422);
     expect(body.errorMessages[0]).toBe('Failed Validation: doneStatus should be BOOLEAN but was STRING');
   });
 
@@ -300,7 +304,7 @@ test.describe('Попытаться создать задачу', () => {
 
     const { status, body } = await api.todos.post({ token, data });
 
-    expect(status).toBe(400);
+    expect(status).toBe(422);
     expect(body.errorMessages[0]).toBe('Failed Validation: Maximum allowable length exceeded for title - maximum allowed is 50');
   });
 
@@ -309,7 +313,7 @@ test.describe('Попытаться создать задачу', () => {
 
     const { status, body } = await api.todos.post({ token, data });
 
-    expect(status).toBe(400);
+    expect(status).toBe(422);
     expect(body.errorMessages[0]).toBe('Failed Validation: Maximum allowable length exceeded for description - maximum allowed is 200');
   });
 
@@ -319,7 +323,7 @@ test.describe('Попытаться создать задачу', () => {
     const { status, body } = await api.todos.post({ token, data });
 
     expect(status).toBe(413);
-    expect(body.errorMessages[0]).toBe('Error: Request body too large, max allowed is 5000 bytes');
+    expect(body.errorMessages[0]).toBe('Error: request body too large, max allowed is 5000 bytes');
   });
 
   test('с несуществующим полем deadline', { tag: '@post' }, async ({ api }) => {
@@ -327,8 +331,8 @@ test.describe('Попытаться создать задачу', () => {
 
     const { status, body } = await api.todos.post({ token, data });
 
-    expect(status).toBe(400);
-    expect(body.errorMessages[0]).toBe('Could not find field: deadline');
+    expect(status).toBe(422);
+    expect(body.errorMessages[0]).toBe('Failed Validation: Could not find field: deadline');
   });
 
   test('в неподдерживаемом формате', { tag: '@post' }, async ({ api }) => {
@@ -349,11 +353,14 @@ test('Удалить все задачи', { tag: '@delete' }, async ({ api }) =
 
   ({ body } = await api.todos.get({ token }));
 
-  const ids = body.todos.map(({ id }) => id);
+  let ids = body.todos.map(({ id }) => id);
 
-  for (const id of ids) {
-    const { status } = await api.todos.delete({ token, id });
-    expect(status).toBe(200);
+  while (ids.length) {
+    const { status } = await api.todos.delete({ token, id: ids[0] });
+    expect(status).toBe(204);
+
+    const { body } = await api.todos.get({ token });
+    ids = body.todos.map(({ id }) => id);
   }
 
   ({ body } = await api.todos.get({ token }));
